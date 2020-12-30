@@ -3,7 +3,7 @@ package com.velocitypowered.api.network;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import jdk.nashorn.internal.ir.annotations.Immutable;
+import com.google.errorprone.annotations.Immutable;
 
 import java.util.EnumSet;
 import java.util.HashMap;
