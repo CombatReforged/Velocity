@@ -1,7 +1,10 @@
 package com.velocitypowered.api.network;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import jdk.nashorn.internal.ir.annotations.Immutable;
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +36,21 @@ public enum ProtocolVersion {
   MINECRAFT_1_14_1(480, "1.14.1"),
   MINECRAFT_1_14_2(485, "1.14.2"),
   MINECRAFT_1_14_3(490, "1.14.3"),
+  MINECRAFT_1_14_COMBAT_1(500, "1.14_combat-212796", Flags.COMBAT_TEST),
   MINECRAFT_1_14_4(498, "1.14.4"),
+  MINECRAFT_1_14_COMBAT_2(501, "1.14_combat-0", Flags.COMBAT_TEST),
+  MINECRAFT_1_14_COMBAT_3(502, "1.14_combat-3", Flags.COMBAT_TEST),
   MINECRAFT_1_15(573, "1.15"),
+  MINECRAFT_1_15_COMBAT_4(600, "1.15_combat-0", Flags.COMBAT_TEST),
   MINECRAFT_1_15_1(575, "1.15.1"),
   MINECRAFT_1_15_2(578, "1.15.2"),
+  MINECRAFT_1_15_COMBAT_5(601, "1.15_combat-6", Flags.COMBAT_TEST),
   MINECRAFT_1_16(735, "1.16"),
   MINECRAFT_1_16_1(736, "1.16.1"),
   MINECRAFT_1_16_2(751, "1.16.2"),
+  MINECRAFT_1_16_COMBAT_6(801, "1.16_combat-0", Flags.COMBAT_TEST),
+  MINECRAFT_1_16_COMBAT_7(802, "1.16_combat-3", Flags.COMBAT_TEST),
+  MINECRAFT_1_16_COMBAT_8(803, "1.16_combat-5", Flags.COMBAT_TEST),
   MINECRAFT_1_16_3(753, "1.16.3"),
   MINECRAFT_1_16_4(754, "1.16.4");
 
@@ -48,6 +59,7 @@ public enum ProtocolVersion {
   private final int protocol;
   private final int snapshotProtocol;
   private final String name;
+  private final Flags flags;
 
   /**
    * Represents the lowest supported version.
@@ -105,7 +117,15 @@ public enum ProtocolVersion {
     this(protocol, -1, name);
   }
 
+  ProtocolVersion(int protocol, String name, Flags flags) {
+    this(protocol, -1, name, flags);
+  }
+
   ProtocolVersion(int protocol, int snapshotProtocol, String name) {
+    this(protocol, snapshotProtocol, name, snapshotProtocol != -1 ? Flags.SNAPSHOT : Flags.RELEASE);
+  }
+
+  ProtocolVersion(int protocol, int snapshotProtocol, String name, Flags flags) {
     if (snapshotProtocol != -1) {
       this.snapshotProtocol = (1 << SNAPSHOT_BIT) | snapshotProtocol;
     } else {
@@ -114,6 +134,7 @@ public enum ProtocolVersion {
 
     this.protocol = protocol;
     this.name = name;
+    this.flags = flags;
   }
 
   /**
@@ -187,5 +208,36 @@ public enum ProtocolVersion {
   @Override
   public String toString() {
     return name;
+  }
+
+  /**
+   * Returns this {@link ProtocolVersion}'s Flags.
+   *
+   * @return the {@link Flags} of this protocol version
+   */
+  public Flags getFlags() {
+    return this.flags;
+  }
+
+  @Immutable
+  public static class Flags {
+    public static final Flags EMPTY = new Flags();
+    public static final Flags RELEASE = new Flags(Flag.RELEASE);
+    public static final Flags SNAPSHOT = new Flags(Flag.SNAPSHOT);
+    public static final Flags COMBAT_TEST = new Flags(Flag.COMBAT_TEST);
+
+    private final ImmutableList<Flag> flags;
+
+    public Flags(Flag... flags) {
+      this.flags = ImmutableList.copyOf(flags);
+    }
+
+    public boolean has(Flag flag) {
+      return flags.contains(flag);
+    }
+
+    public enum Flag {
+      RELEASE, SNAPSHOT, COMBAT_TEST
+    }
   }
 }

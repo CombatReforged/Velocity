@@ -50,6 +50,13 @@ public interface PlayerSettings {
    */
   MainHand getMainHand();
 
+  /**
+   * Returns if the player has shield blocking on crouch enabled.
+   *
+   * @return if the player has crouch-blocking enabled
+   */
+  boolean isCrouchBlockEnabled();
+
   enum ChatMode {
     SHOWN,
     COMMANDS_ONLY,

@@ -1,6 +1,7 @@
 package com.velocitypowered.proxy.protocol.packet;
 
 import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.api.network.ProtocolVersion.Flags.Flag;
 import com.velocitypowered.proxy.connection.MinecraftSessionHandler;
 import com.velocitypowered.proxy.protocol.MinecraftPacket;
 import com.velocitypowered.proxy.protocol.ProtocolUtils;
@@ -16,18 +17,20 @@ public class ClientSettings implements MinecraftPacket {
   private byte difficulty; // 1.7 Protocol
   private short skinParts;
   private int mainHand;
+  private boolean crouchBlockEnabled;
 
   public ClientSettings() {
   }
 
   public ClientSettings(String locale, byte viewDistance, int chatVisibility, boolean chatColors,
-      short skinParts, int mainHand) {
+      short skinParts, int mainHand, boolean crouchBlockEnabled) {
     this.locale = locale;
     this.viewDistance = viewDistance;
     this.chatVisibility = chatVisibility;
     this.chatColors = chatColors;
     this.skinParts = skinParts;
     this.mainHand = mainHand;
+    this.crouchBlockEnabled = crouchBlockEnabled;
   }
 
   public String getLocale() {
@@ -81,6 +84,14 @@ public class ClientSettings implements MinecraftPacket {
     this.mainHand = mainHand;
   }
 
+  public boolean isCrouchBlockEnabled() {
+    return crouchBlockEnabled;
+  }
+
+  public void setCrouchBlock(boolean crouchBlock) {
+    this.crouchBlockEnabled = crouchBlock;
+  }
+
   @Override
   public String toString() {
     return "ClientSettings{"
@@ -90,6 +101,7 @@ public class ClientSettings implements MinecraftPacket {
         + ", chatColors=" + chatColors
         + ", skinParts=" + skinParts
         + ", mainHand=" + mainHand
+        + ", crouchBlocking=" + crouchBlockEnabled
         + '}';
   }
 
@@ -108,6 +120,9 @@ public class ClientSettings implements MinecraftPacket {
 
     if (version.compareTo(ProtocolVersion.MINECRAFT_1_9) >= 0) {
       this.mainHand = ProtocolUtils.readVarInt(buf);
+    }
+    if (version.getFlags().has(Flag.COMBAT_TEST) && version.compareTo(ProtocolVersion.MINECRAFT_1_15_COMBAT_4) >= 0) {
+      this.crouchBlockEnabled = buf.readBoolean();
     }
   }
 
@@ -129,6 +144,9 @@ public class ClientSettings implements MinecraftPacket {
 
     if (version.compareTo(ProtocolVersion.MINECRAFT_1_9) >= 0) {
       ProtocolUtils.writeVarInt(buf, mainHand);
+    }
+    if (version.getFlags().has(Flag.COMBAT_TEST) && version.compareTo(ProtocolVersion.MINECRAFT_1_15_COMBAT_4) >= 0) {
+      buf.writeBoolean(crouchBlockEnabled);
     }
   }
 
