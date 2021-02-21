@@ -65,10 +65,13 @@ public class BackendPlaySessionHandler implements MinecraftSessionHandler {
   @Override
   public void activated() {
     serverConn.getServer().addPlayer(serverConn.getPlayer());
-    MinecraftConnection serverMc = serverConn.ensureConnected();
-    serverMc.write(PluginMessageUtil.constructChannelsPacket(serverMc.getProtocolVersion(),
-        ImmutableList.of(getBungeeCordChannel(serverMc.getProtocolVersion()))
-    ));
+
+    if (server.getConfiguration().isBungeePluginChannelEnabled()) {
+      MinecraftConnection serverMc = serverConn.ensureConnected();
+      serverMc.write(PluginMessageUtil.constructChannelsPacket(serverMc.getProtocolVersion(),
+          ImmutableList.of(getBungeeCordChannel(serverMc.getProtocolVersion()))
+      ));
+    }
   }
 
   @Override
@@ -83,7 +86,7 @@ public class BackendPlaySessionHandler implements MinecraftSessionHandler {
 
   @Override
   public boolean handle(KeepAlive packet) {
-    serverConn.setLastPingId(packet.getRandomId());
+    serverConn.getPendingPings().put(packet.getRandomId(), System.currentTimeMillis());
     return false; // forwards on
   }
 
